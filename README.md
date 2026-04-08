@@ -165,6 +165,24 @@
 - интерфейс библиотеки: [docs/INTERFACE.md](/home/algebrain/src/my/lcmm/lcmf-request-state/docs/INTERFACE.md)
 - базовый пример использования: [examples/basic_usage.cljs](/home/algebrain/src/my/lcmm/lcmf-request-state/examples/basic_usage.cljs)
 
+## Проверка
+
+Основной тестовый контур библиотеки идет на `node` через `shadow-cljs`.
+
+Обычный локальный прогон:
+
+```bash
+bb test.bb
+```
+
+Отдельные команды:
+
+```bash
+clojure -M:lint
+clojure -M:test
+clojure -M:format
+```
+
 ## Статус
 
 Текущая версия сосредоточена на минимальном practically useful API для

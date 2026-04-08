@@ -1,6 +1,13 @@
 (ns lcmf.request-state-test
-  (:require [clojure.test :refer [deftest is testing]]
+  (:require [cljs.test :refer-macros [deftest is testing]]
             [lcmf.request-state :as rs]))
+
+(defn- thrown-data [f]
+  (try
+    (f)
+    nil
+    (catch :default ex
+      (ex-data ex))))
 
 (deftest init-state-test
   (testing "init-state returns the default shape"
@@ -26,8 +33,8 @@
       (is (= {:items []} (:data state)))))
 
   (testing "init-state rejects non-canonical status values"
-    (is (thrown? clojure.lang.ExceptionInfo
-                 (rs/init-state {:status :revalidating})))))
+    (is (= :invalid-argument
+           (:reason (thrown-data #(rs/init-state {:status :revalidating})))))))
 
 (deftest start-transition-test
   (testing "start! moves state to pending and clears error"
@@ -103,7 +110,7 @@
       (is (= :cancelled (:status @state)))
       (is (= {:items [1]} (:data @state)))
       (is (nil? (:error @state)))
-      (is (integer? (:finished-at @state))))))
+      (is (number? (:finished-at @state))))))
 
 (deftest latest-only-run-test
   (testing "complete-run! ignores stale run results"
@@ -151,37 +158,37 @@
 
 (deftest invalid-arguments-test
   (testing "state must be atom"
-    (is (thrown? clojure.lang.ExceptionInfo
-                 (rs/start! {}))))
+    (is (= :invalid-argument
+           (:reason (thrown-data #(rs/start! {}))))))
 
   (testing "fail! requires map error"
-    (is (thrown? clojure.lang.ExceptionInfo
-                 (rs/fail! (atom (rs/init-state))
-                           :boom))))
+    (is (= :invalid-argument
+           (:reason (thrown-data #(rs/fail! (atom (rs/init-state))
+                                            :boom))))))
 
   (testing "init-state rejects unknown keys"
-    (is (thrown? clojure.lang.ExceptionInfo
-                 (rs/init-state {:unknown true}))))
+    (is (= :invalid-argument
+           (:reason (thrown-data #(rs/init-state {:unknown true}))))))
 
   (testing "start! rejects unknown option keys"
-    (is (thrown? clojure.lang.ExceptionInfo
-                 (rs/start! (atom (rs/init-state))
-                            {:started-at 10
-                             :unknown true}))))
+    (is (= :invalid-argument
+           (:reason (thrown-data #(rs/start! (atom (rs/init-state))
+                                             {:started-at 10
+                                              :unknown true}))))))
 
   (testing "start-refresh! rejects unknown option keys"
-    (is (thrown? clojure.lang.ExceptionInfo
-                 (rs/start-refresh! (atom (rs/init-state))
-                                    {:unknown true}))))
+    (is (= :invalid-argument
+           (:reason (thrown-data #(rs/start-refresh! (atom (rs/init-state))
+                                                     {:unknown true}))))))
 
   (testing "complete-run! error result requires map error payload"
     (let [state (atom (rs/init-state))
           run-id (rs/begin-run! state)]
-      (is (thrown? clojure.lang.ExceptionInfo
-                   (rs/complete-run! state run-id {:status :error})))
-      (is (thrown? clojure.lang.ExceptionInfo
-                   (rs/complete-run! state run-id {:status :error
-                                                   :error :boom})))))
+      (is (= :invalid-argument
+             (:reason (thrown-data #(rs/complete-run! state run-id {:status :error})))))
+      (is (= :invalid-argument
+             (:reason (thrown-data #(rs/complete-run! state run-id {:status :error
+                                                                    :error :boom})))))))
 
   (testing "complete-run! success accepts nil response"
     (let [state (atom (rs/init-state))
@@ -194,10 +201,10 @@
   (testing "complete-run! success rejects non-map response"
     (let [state (atom (rs/init-state))
           run-id (rs/begin-run! state)]
-      (is (thrown? clojure.lang.ExceptionInfo
-                   (rs/complete-run! state run-id {:status :success
-                                                   :data {:items []}
-                                                   :response :boom}))))))
+      (is (= :invalid-argument
+             (:reason (thrown-data #(rs/complete-run! state run-id {:status :success
+                                                                    :data {:items []}
+                                                                    :response :boom}))))))))
 
 (deftest single-flow-api-test
   (testing "single-flow state works without operation identity"

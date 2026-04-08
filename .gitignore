@@ -1,3 +1,4 @@
 .cpcache/
 .plans/
 .codex
+.shadow-cljs/
