@@ -162,8 +162,8 @@
 
 ## Примеры в репозитории
 
-- интерфейс библиотеки: [docs/INTERFACE.md](/home/algebrain/src/my/lcmm/lcmf-request-state/docs/INTERFACE.md)
-- базовый пример использования: [examples/basic_usage.cljs](/home/algebrain/src/my/lcmm/lcmf-request-state/examples/basic_usage.cljs)
+- интерфейс библиотеки: [docs/INTERFACE.md](docs/INTERFACE.md)
+- базовый пример использования: [examples/basic_usage.cljs](examples/basic_usage.cljs)
 
 ## Проверка
 
